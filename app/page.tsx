@@ -1,9 +1,9 @@
-import ChessGame from "@/components/chess-game"
+import MainMenu from "@/components/main-menu"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <ChessGame />
+    <div className="min-h-screen bg-white">
+      <MainMenu />
     </div>
   )
 }
