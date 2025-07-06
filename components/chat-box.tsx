@@ -16,30 +16,18 @@ interface Message {
 }
 
 interface ChatBoxProps {
-  username: string
+  username: string;
+  messages: Message[];
+  onSendMessage: (message: string) => void;
 }
 
-export default function ChatBox({ username }: ChatBoxProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      username: "System",
-      message: "Welcome to the chess game!",
-      timestamp: new Date(),
-    },
-  ])
-  const [newMessage, setNewMessage] = useState("")
+export default function ChatBox({ username, messages, onSendMessage }: ChatBoxProps) {
+  const [newMessage, setNewMessage] = useState("");
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
-      const message: Message = {
-        id: messages.length + 1,
-        username,
-        message: newMessage.trim(),
-        timestamp: new Date(),
-      }
-      setMessages([...messages, message])
-      setNewMessage("")
+      onSendMessage(newMessage.trim());
+      setNewMessage("");
     }
   }
 

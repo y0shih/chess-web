@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Crown, Gamepad2, Zap, ArrowLeft, User, Mail, Calendar, Trophy } from "lucide-react"
 
-type GameMode = "ranked" | "classic" | "chaos" | null
+type GameMode = "ranked" | "classic" | "chaos" | "alone" | null
 
 // Mock user data
 const userData = {
   name: "John Doe",
   email: "john.doe@example.com",
-  elo: 1247,
+  elo: 1337,
   joinDate: "March 2024",
   matchesPlayed: 156,
   wins: 89,
@@ -25,8 +25,8 @@ export default function MainMenu() {
   const router = useRouter()
 
   const handleModeSelect = (mode: GameMode) => {
-    if (mode === "classic") {
-      router.push("/game")
+    if (mode === "classic" || mode === "alone") {
+      router.push(`/game?mode=${mode}`)
     } else {
       setSelectedMode(mode)
       setShowWorkInProgress(true)
@@ -76,12 +76,12 @@ export default function MainMenu() {
             {/* Game Title */}
             <div className="mb-12 text-center lg:text-left">
               <h1 className="text-6xl md:text-7xl font-bold text-gray-800 mb-4 tracking-tight">
-                Chess
+                Ches
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                  Master
+                  Sy
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 font-light">Choose your battle mode</p>
+              <p className="text-xl text-gray-600 font-light">Choose your mode</p>
             </div>
 
             {/* Game Mode Selection */}
@@ -126,6 +126,21 @@ export default function MainMenu() {
                     <div className="text-left">
                       <h3 className="text-xl font-semibold text-gray-800">Chaos</h3>
                       <p className="text-sm text-gray-500">Random events and power-ups</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Alone Mode */}
+              <Card className="bg-white border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6" onClick={() => handleModeSelect("alone")}>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                      <User className="w-6 h-6 text-gray-600" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-xl font-semibold text-gray-800">Alone</h3>
+                      <p className="text-sm text-gray-500">Debug mode, move both sides</p>
                     </div>
                   </div>
                 </CardContent>
