@@ -1,30 +1,158 @@
-# Simple chess gui
+# CheSy - Modern Chess Web Application
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A modern, responsive chess web application built with Next.js 14 and TypeScript.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/y0shihs-projects/v0-simple-chess-gui)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/uhOXcIwliy7)
+## Features
 
-## Overview
+- **Multiple Game Modes**
+  - Classic: Traditional chess gameplay
+  - Alone: Debug mode to move both sides
+  - Ranked: Competitive matches with ELO rating (coming soon)
+  - Chaos: Random events and power-ups (coming soon)
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+- **User Authentication**
+  - Login/Register system
+  - User profiles with statistics
+  - ELO rating tracking
+  - Match history
 
-## Deployment
+- **Modern UI/UX**
+  - Clean, responsive design
+  - Tailwind CSS styling
+  - Smooth animations and transitions
+  - Mobile-friendly interface
 
-Your project is live at:
+- **Real-time Features**
+  - Socket.IO integration for live gameplay
+  - Real-time chat during matches
+  - Live game state synchronization
 
-**[https://vercel.com/y0shihs-projects/v0-simple-chess-gui](https://vercel.com/y0shihs-projects/v0-simple-chess-gui)**
+## Tech Stack
 
-## Build your app
+- **Frontend**: Next.js 14 (App Router), React 18, TypeScript
+- **Backend**: Nest.js (Game logic, Elo system)
+- **Styling**: Tailwind CSS, Radix UI, shadcn/ui components
+- **Chess Logic**: chess.js library
+- **Real-time**: Socket.IO client
+- **State Management**: React hooks (useState, useEffect)
 
-Continue building your app on:
+## Getting Started
 
-**[https://v0.dev/chat/projects/uhOXcIwliy7](https://v0.dev/chat/projects/uhOXcIwliy7)**
+### Prerequisites
 
-## How It Works
+- Node.js 18+ or npm/pnpm
+- A backend server running on localhost:8000 (Socket.IO)
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+### Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/y0shih/chess-web.git
+cd chess-web
+```
+
+2. Install dependencies
+```bash
+npm install
+# or
+pnpm install
+```
+
+3. Run the development server
+```bash
+npm run dev
+# or
+pnpm dev
+```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+# or
+pnpm build
+pnpm start
+```
+
+## Backend API Requirements
+
+The frontend expects the following API endpoints:
+
+### Authentication
+
+**POST /api/auth/login**
+```json
+{
+  "email": "string",
+  "password": "string"
+}
+```
+
+**POST /api/auth/register**
+```json
+{
+  "name": "string",
+  "email": "string", 
+  "password": "string"
+}
+```
+
+**Response format for both:**
+```json
+{
+  "user": {
+    "id": "string",
+    "name": "string",
+    "email": "string",
+    "elo": "number",
+    "joinDate": "string",
+    "matchesPlayed": "number",
+    "wins": "number",
+    "losses": "number"
+  },
+  "token": "string"
+}
+```
+
+### User Profile
+
+**GET /api/user/profile** (requires authentication)
+Returns user profile data in the same format as the auth response.
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npx tsc --noEmit` - Type check
+
+## Project Structure
+
+```
+chess-web/
+├── app/                 # Next.js App Router pages
+├── components/          # React components
+│   ├── auth/           # Authentication components
+│   ├── ui/             # Reusable UI components
+│   └── ...
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions
+├── public/             # Static assets
+├── styles/             # Global styles
+└── ...
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
