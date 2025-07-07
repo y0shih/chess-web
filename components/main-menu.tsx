@@ -4,11 +4,14 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Crown, Gamepad2, Zap, ArrowLeft, User, Mail, Calendar, Trophy } from "lucide-react"
+import { Crown, Gamepad2, Zap, ArrowLeft, User, Mail, Calendar, Trophy, LogOut } from "lucide-react"
+import LoginForm from "@/components/auth/login-form"
+import RegisterForm from "@/components/auth/register-form"
 
 type GameMode = "ranked" | "classic" | "chaos" | "alone" | null
+type AuthMode = "login" | "register" | null
 
-// Mock user data
+// Mock user data - will be replaced with actual user data from backend
 const userData = {
   name: "John Doe",
   email: "john.doe@example.com",
@@ -22,6 +25,9 @@ const userData = {
 export default function MainMenu() {
   const [selectedMode, setSelectedMode] = useState<GameMode>(null)
   const [showWorkInProgress, setShowWorkInProgress] = useState(false)
+  const [authMode, setAuthMode] = useState<AuthMode>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [currentUser, setCurrentUser] = useState(userData)
   const router = useRouter()
 
   const handleModeSelect = (mode: GameMode) => {
@@ -36,6 +42,48 @@ export default function MainMenu() {
   const handleBackToMenu = () => {
     setShowWorkInProgress(false)
     setSelectedMode(null)
+  }
+
+  const handleLogin = async (email: string, password: string) => {
+    // TODO: Replace with actual API call to backend
+    console.log("Login attempt:", { email, password })
+    
+    // Mock login success
+    setIsLoggedIn(true)
+    setCurrentUser({
+      name: "John Doe", // Replace with actual user data from backend
+      email: email,
+      elo: 1337,
+      joinDate: "March 2024",
+      matchesPlayed: 156,
+      wins: 89,
+      losses: 67,
+    })
+    setAuthMode(null)
+  }
+
+  const handleRegister = async (name: string, email: string, password: string) => {
+    // TODO: Replace with actual API call to backend
+    console.log("Register attempt:", { name, email, password })
+    
+    // Mock registration success
+    setIsLoggedIn(true)
+    setCurrentUser({
+      name: name,
+      email: email,
+      elo: 1000, // Default ELO for new users
+      joinDate: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+      matchesPlayed: 0,
+      wins: 0,
+      losses: 0,
+    })
+    setAuthMode(null)
+  }
+
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    setCurrentUser(userData)
+    setAuthMode(null)
   }
 
   if (showWorkInProgress) {
@@ -63,6 +111,25 @@ export default function MainMenu() {
             </div>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  // Show auth forms if not logged in
+  if (!isLoggedIn && authMode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+        {authMode === "login" ? (
+          <LoginForm
+            onLogin={handleLogin}
+            onSwitchToRegister={() => setAuthMode("register")}
+          />
+        ) : (
+          <RegisterForm
+            onRegister={handleRegister}
+            onSwitchToLogin={() => setAuthMode("login")}
+          />
+        )}
       </div>
     )
   }
@@ -153,15 +220,26 @@ export default function MainMenu() {
             </div>
           </div>
 
-          {/* Right Side - User Info */}
+          {/* Right Side - User Info or Auth */}
           <div className="flex justify-center lg:justify-end">
-            <Card className="w-full max-w-md bg-white border-gray-200 shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  Player Profile
-                </CardTitle>
-              </CardHeader>
+            {isLoggedIn ? (
+              <Card className="w-full max-w-md bg-white border-gray-200 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold text-gray-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <User className="w-5 h-5" />
+                      Player Profile
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleLogout}
+                      className="text-gray-500 hover:text-red-600"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
               <CardContent className="space-y-6">
                 {/* Basic Info */}
                 <div className="space-y-3">
@@ -169,7 +247,7 @@ export default function MainMenu() {
                     <User className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Name</p>
-                      <p className="font-semibold text-gray-800">{userData.name}</p>
+                      <p className="font-semibold text-gray-800">{currentUser.name}</p>
                     </div>
                   </div>
 
@@ -177,7 +255,7 @@ export default function MainMenu() {
                     <Mail className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-semibold text-gray-800">{userData.email}</p>
+                      <p className="font-semibold text-gray-800">{currentUser.email}</p>
                     </div>
                   </div>
 
@@ -185,7 +263,7 @@ export default function MainMenu() {
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Member Since</p>
-                      <p className="font-semibold text-gray-800">{userData.joinDate}</p>
+                      <p className="font-semibold text-gray-800">{currentUser.joinDate}</p>
                     </div>
                   </div>
                 </div>
@@ -197,7 +275,7 @@ export default function MainMenu() {
                       <Trophy className="w-5 h-5 text-blue-600" />
                       <span className="text-sm font-medium text-gray-700">ELO Rating</span>
                     </div>
-                    <span className="text-2xl font-bold text-blue-600">{userData.elo}</span>
+                    <span className="text-2xl font-bold text-blue-600">{currentUser.elo}</span>
                   </div>
                 </div>
 
@@ -207,15 +285,15 @@ export default function MainMenu() {
 
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{userData.matchesPlayed}</p>
+                      <p className="text-2xl font-bold text-gray-800">{currentUser.matchesPlayed}</p>
                       <p className="text-xs text-gray-500">Total</p>
                     </div>
                     <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-2xl font-bold text-green-600">{userData.wins}</p>
+                      <p className="text-2xl font-bold text-green-600">{currentUser.wins}</p>
                       <p className="text-xs text-gray-500">Wins</p>
                     </div>
                     <div className="bg-red-50 p-3 rounded-lg">
-                      <p className="text-2xl font-bold text-red-600">{userData.losses}</p>
+                      <p className="text-2xl font-bold text-red-600">{currentUser.losses}</p>
                       <p className="text-xs text-gray-500">Losses</p>
                     </div>
                   </div>
@@ -225,19 +303,57 @@ export default function MainMenu() {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium text-gray-700">Win Rate</span>
                       <span className="text-sm font-bold text-gray-800">
-                        {Math.round((userData.wins / userData.matchesPlayed) * 100)}%
+                        {currentUser.matchesPlayed > 0 
+                          ? Math.round((currentUser.wins / currentUser.matchesPlayed) * 100)
+                          : 0}%
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(userData.wins / userData.matchesPlayed) * 100}%` }}
+                        style={{ 
+                          width: `${currentUser.matchesPlayed > 0 
+                            ? (currentUser.wins / currentUser.matchesPlayed) * 100 
+                            : 0}%` 
+                        }}
                       ></div>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+            ) : (
+              <Card className="w-full max-w-md bg-white border-gray-200 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-2xl font-bold text-gray-800 text-center">
+                    Welcome to CheSy
+                  </CardTitle>
+                  <p className="text-gray-600 text-center text-sm">
+                    Sign in to track your games and compete with others
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    onClick={() => setAuthMode("login")}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3"
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={() => setAuthMode("register")}
+                    variant="outline"
+                    className="w-full border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-3"
+                  >
+                    Create Account
+                  </Button>
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-gray-500">
+                      You can also play as a guest in Classic or Alone mode
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

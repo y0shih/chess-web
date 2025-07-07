@@ -123,8 +123,15 @@ export default function ChessGame() {
   }
 
   const handleResign = () => {
-    // Implement resign logic with backend
-    alert(`${playerColor} has resigned! (Not yet implemented with backend)`)
+    if (socket) {
+      socket.emit("resign")
+    }
+  }
+
+  const handleDisconnect = () => {
+    if (socket) {
+      socket.disconnect()
+    }
   }
 
   const getGameStatus = () => {
@@ -150,8 +157,7 @@ export default function ChessGame() {
           <ArrowLeft className="h-4 w-4" />
           Back to Menu
         </Button>
-        <h1 className="text-3xl font-bold text-gray-800">Chess Game Online</h1>
-        <div></div> {/* Spacer for centering */}
+        <h1 className="text-2xl font-bold">{mode === "alone" ? "Solo Mode" : "Multiplayer Mode"}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -183,6 +189,7 @@ export default function ChessGame() {
           <GameControls
             onResign={handleResign}
             gameStatus={getGameStatus()}
+            onDisconnect={handleDisconnect}
           />
           <ChatBox username={playerColor || "Player"} messages={chatMessages} onSendMessage={handleSendMessage} />
         </div>
