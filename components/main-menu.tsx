@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,13 +13,14 @@ type AuthMode = "login" | "register" | null
 
 // Mock user data - will be replaced with actual user data from backend
 const userData = {
-  name: "John Doe",
+  username: "john_doe",
   email: "john.doe@example.com",
   elo: 1337,
-  joinDate: "March 2024",
-  matchesPlayed: 156,
-  wins: 89,
-  losses: 67,
+  createdAt: "March 2024",
+  gamesPlayed: 156,
+  gamesWon: 89,
+  gamesLost: 67,
+  gamesDraw: 0,
 }
 
 export default function MainMenu() {
@@ -28,7 +29,40 @@ export default function MainMenu() {
   const [authMode, setAuthMode] = useState<AuthMode>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentUser, setCurrentUser] = useState(userData)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+  // Check for existing login on component mount
+  useEffect(() => {
+    const checkExistingLogin = async () => {
+      try {
+        const { AuthAPI } = await import("@/lib/auth-api")
+        if (AuthAPI.isLoggedIn()) {
+          const userProfile = await AuthAPI.getUserProfile()
+          setIsLoggedIn(true)
+          setCurrentUser({
+            username: userProfile.username,
+            email: userProfile.email,
+            elo: userProfile.elo,
+            createdAt: new Date(userProfile.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+            gamesPlayed: userProfile.gamesPlayed,
+            gamesWon: userProfile.gamesWon,
+            gamesLost: userProfile.gamesLost,
+            gamesDraw: userProfile.gamesDraw,
+          })
+        }
+      } catch (error) {
+        console.error("Failed to restore login:", error)
+        // Clear invalid token
+        const { AuthAPI } = await import("@/lib/auth-api")
+        AuthAPI.logout()
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkExistingLogin()
+  }, [])
 
   const handleModeSelect = (mode: GameMode) => {
     if (mode === "classic" || mode === "alone") {
@@ -44,46 +78,71 @@ export default function MainMenu() {
     setSelectedMode(null)
   }
 
-  const handleLogin = async (email: string, password: string) => {
-    // TODO: Replace with actual API call to backend
-    console.log("Login attempt:", { email, password })
-    
-    // Mock login success
-    setIsLoggedIn(true)
-    setCurrentUser({
-      name: "John Doe", // Replace with actual user data from backend
-      email: email,
-      elo: 1337,
-      joinDate: "March 2024",
-      matchesPlayed: 156,
-      wins: 89,
-      losses: 67,
-    })
-    setAuthMode(null)
+  const handleLogin = async (username: string, password: string) => {
+    try {
+      const { AuthAPI } = await import("@/lib/auth-api")
+      const authResponse = await AuthAPI.login(username, password)
+      
+      // Get full user profile after login
+      const userProfile = await AuthAPI.getUserProfile()
+      
+      setIsLoggedIn(true)
+      setCurrentUser({
+        username: userProfile.username,
+        email: userProfile.email,
+        elo: userProfile.elo,
+        createdAt: new Date(userProfile.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+        gamesPlayed: userProfile.gamesPlayed,
+        gamesWon: userProfile.gamesWon,
+        gamesLost: userProfile.gamesLost,
+        gamesDraw: userProfile.gamesDraw,
+      })
+      setAuthMode(null)
+    } catch (error) {
+      console.error("Login failed:", error)
+      alert(error instanceof Error ? error.message : "Login failed")
+    }
   }
 
-  const handleRegister = async (name: string, email: string, password: string) => {
-    // TODO: Replace with actual API call to backend
-    console.log("Register attempt:", { name, email, password })
-    
-    // Mock registration success
-    setIsLoggedIn(true)
-    setCurrentUser({
-      name: name,
-      email: email,
-      elo: 1000, // Default ELO for new users
-      joinDate: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
-      matchesPlayed: 0,
-      wins: 0,
-      losses: 0,
-    })
-    setAuthMode(null)
+  const handleRegister = async (username: string, email: string, password: string) => {
+    try {
+      const { AuthAPI } = await import("@/lib/auth-api")
+      const registerResponse = await AuthAPI.register(username, email, password)
+      
+      if (registerResponse.user) {
+        // Registration successful, now login to get token
+        await handleLogin(username, password)
+      } else {
+        throw new Error(registerResponse.error || "Registration failed")
+      }
+    } catch (error) {
+      console.error("Registration failed:", error)
+      alert(error instanceof Error ? error.message : "Registration failed")
+    }
   }
 
-  const handleLogout = () => {
-    setIsLoggedIn(false)
-    setCurrentUser(userData)
-    setAuthMode(null)
+  const handleLogout = async () => {
+    try {
+      const { AuthAPI } = await import("@/lib/auth-api")
+      AuthAPI.logout()
+      setIsLoggedIn(false)
+      setCurrentUser(userData)
+      setAuthMode(null)
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
+  }
+
+  // Show loading state while checking for existing login
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   if (showWorkInProgress) {
@@ -246,8 +305,8 @@ export default function MainMenu() {
                   <div className="flex items-center gap-3">
                     <User className="w-4 h-4 text-gray-500" />
                     <div>
-                      <p className="text-sm text-gray-500">Name</p>
-                      <p className="font-semibold text-gray-800">{currentUser.name}</p>
+                      <p className="text-sm text-gray-500">Username</p>
+                      <p className="font-semibold text-gray-800">{currentUser.username}</p>
                     </div>
                   </div>
 
@@ -263,7 +322,7 @@ export default function MainMenu() {
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Member Since</p>
-                      <p className="font-semibold text-gray-800">{currentUser.joinDate}</p>
+                      <p className="font-semibold text-gray-800">{currentUser.createdAt}</p>
                     </div>
                   </div>
                 </div>
@@ -285,15 +344,15 @@ export default function MainMenu() {
 
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{currentUser.matchesPlayed}</p>
+                      <p className="text-2xl font-bold text-gray-800">{currentUser.gamesPlayed}</p>
                       <p className="text-xs text-gray-500">Total</p>
                     </div>
                     <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-2xl font-bold text-green-600">{currentUser.wins}</p>
+                      <p className="text-2xl font-bold text-green-600">{currentUser.gamesWon}</p>
                       <p className="text-xs text-gray-500">Wins</p>
                     </div>
                     <div className="bg-red-50 p-3 rounded-lg">
-                      <p className="text-2xl font-bold text-red-600">{currentUser.losses}</p>
+                      <p className="text-2xl font-bold text-red-600">{currentUser.gamesLost}</p>
                       <p className="text-xs text-gray-500">Losses</p>
                     </div>
                   </div>
@@ -303,8 +362,8 @@ export default function MainMenu() {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium text-gray-700">Win Rate</span>
                       <span className="text-sm font-bold text-gray-800">
-                        {currentUser.matchesPlayed > 0 
-                          ? Math.round((currentUser.wins / currentUser.matchesPlayed) * 100)
+                        {currentUser.gamesPlayed > 0 
+                          ? Math.round((currentUser.gamesWon / currentUser.gamesPlayed) * 100)
                           : 0}%
                       </span>
                     </div>
@@ -312,8 +371,8 @@ export default function MainMenu() {
                       <div
                         className="bg-green-500 h-2 rounded-full transition-all duration-300"
                         style={{ 
-                          width: `${currentUser.matchesPlayed > 0 
-                            ? (currentUser.wins / currentUser.matchesPlayed) * 100 
+                          width: `${currentUser.gamesPlayed > 0 
+                            ? (currentUser.gamesWon / currentUser.gamesPlayed) * 100 
                             : 0}%` 
                         }}
                       ></div>

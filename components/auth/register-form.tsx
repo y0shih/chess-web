@@ -8,12 +8,12 @@ import { Label } from "@/components/ui/label"
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react"
 
 interface RegisterFormProps {
-  onRegister: (name: string, email: string, password: string) => void
+  onRegister: (username: string, email: string, password: string) => void
   onSwitchToLogin: () => void
 }
 
 export default function RegisterForm({ onRegister, onSwitchToLogin }: RegisterFormProps) {
-  const [name, setName] = useState("")
+  const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -32,7 +32,7 @@ export default function RegisterForm({ onRegister, onSwitchToLogin }: RegisterFo
     setIsLoading(true)
     
     try {
-      await onRegister(name, email, password)
+      await onRegister(username, email, password)
     } finally {
       setIsLoading(false)
     }
@@ -51,17 +51,17 @@ export default function RegisterForm({ onRegister, onSwitchToLogin }: RegisterFo
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-              Full Name
+            <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+              Username
             </Label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                id="name"
+                id="username"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your full name"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                 required
               />

@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { User, Lock, Eye, EyeOff } from "lucide-react"
 
 interface LoginFormProps {
-  onLogin: (email: string, password: string) => void
+  onLogin: (username: string, password: string) => void
   onSwitchToRegister: () => void
 }
 
 export default function LoginForm({ onLogin, onSwitchToRegister }: LoginFormProps) {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -23,7 +23,7 @@ export default function LoginForm({ onLogin, onSwitchToRegister }: LoginFormProp
     setIsLoading(true)
     
     try {
-      await onLogin(email, password)
+      await onLogin(username, password)
     } finally {
       setIsLoading(false)
     }
@@ -42,17 +42,17 @@ export default function LoginForm({ onLogin, onSwitchToRegister }: LoginFormProp
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email
+            <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+              Username
             </Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                 required
               />
